@@ -1,0 +1,27 @@
+name: Build Latest
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 0 * * *'
+env:
+  ProjectName: murmur
+  Owner: hmbsbige # ${{ github.repository_owner }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT }}
+
+      - name: Build
+        run: |
+          docker build --pull -t ghcr.io/${{ env.Owner }}/${{ env.ProjectName }}:latest github.com/mumble-voip/mumble#master
+
+      - name: Push
+        run: |
+          docker push ghcr.io/${{ env.Owner }}/${{ env.ProjectName }}:latest
